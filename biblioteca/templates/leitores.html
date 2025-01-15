@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+{% extends "index.html" %}
+{% load static %}
+{% block main %}
+    <div class="container d-flex flex-column text-center justify-content-center"
+         style="padding-top:0px;
+                background-color: #fff">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="col-md-12 text-light" style="background:#0d6efd;">
+                    <h4 style="margin-bottom: 0px; padding:10px 0 10px 0">Registre novo leitor</h4>
+                </div>
+                <div class="container-fluid"
+                     style="overflow-y: auto;
+                            height: 600px;
+                            background:  #daf1ff">
+                    <form class="d-flex flex-column" action="/leitores/adicionar" method="POST">
+                        {% csrf_token %}
+                        <table class="table" style="margin-top: 20px;">
+                            <tr>
+                                <td style="text-align: left; vertical-align: middle; padding-left: 15px;">Nome:</td>
+                                <td>
+                                    <input type="text" class="form-control" name="nome_leitor">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: left; vertical-align: middle; padding-left: 15px;">Data de Nascimento:</td>
+                                <td>
+                                    <input type="date" class="form-control" name="data_nascimento_leitor">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <button class="btn btn-primary" type="submit">Salvar</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                    <ul style="text-align: left; padding-left: 15px;">
+                        <li>
+                            <small>Leitores não podem se registrar múltiplas vezes</small>
+                        </li>
+                        <li>
+                            <small>Leitores com registro duplicado serão desativados</small>
+                        </li>
+                        <li>
+                            <small>As informações dadas acima devem estar corretas e sujeitas a verificação</small>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <nav class="navbar bg-body-light">
+                        <div class="container-fluid justify-content-center align-items-center">
+                            <form class="d-flex" role="search" action="/leitores" method="POST">
+                                {% csrf_token %}
+                                <input class="form-control me-2" type="search" placeholder="Pesquisar" aria-label="Pesquisar" name="termos_pesquisa" value={{ termos_pesquisa }}>
+                                <button class="btn btn-outline-primary" type="submit">Pesquisar</button>
+                            </form>
+                        </div>
+                    </nav>
+                </div>
+                <div class="row" style="margin-top: 20px;">
+                    {% if leitores|length == 1 %}
+                        <p>{{ leitores|length }} leitor encontrado.</p>
+                    {% else %}
+                        <p>{{ leitores|length }} leitores encontrados.</p>
+                    {% endif %}
+                </div>
+                <div class="row" style="margin-top: 20px;">
+                    <div class="container" style="overflow-y: auto; height: 400px;">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <td>Nome</td>
+                                    <td>Data de Nascimento</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for leitor in leitores %}
+                                    <tr>
+                                        <td>{{ leitor.nome }}</td>
+                                        <td>{{ leitor.data_nascimento }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

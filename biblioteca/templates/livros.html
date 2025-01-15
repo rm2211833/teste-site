@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+{% extends "index.html" %}
+{% load static %}
+{% block main %}
+    <div class="container d-flex flex-column text-center justify-content-center"
+         style="padding-top:0px;
+                background-color: #fff">
+        <div class="row">
+            <nav class="navbar bg-body-light">
+                <div class="container-fluid justify-content-center align-items-center">
+                    <form class="d-flex" role="search" action="/livros" method="POST">
+                        {% csrf_token %}
+                        <input class="form-control me-2" type="search" placeholder="Pesquisar" aria-label="Pesquisar" name="termos_pesquisa" value={{ termos_pesquisa }}>
+                        <button class="btn btn-outline-primary" type="submit">Pesquisar</button>
+                    </form>
+                </div>
+            </nav>
+        </div>
+        <div class="row" style="margin-top: 20px;">
+            {% if livros|length == 1 %}
+                <p>{{ livros|length }} livro encontrado.</p>
+            {% elif livros|length > 1 %}
+                <p>{{ livros|length }} livros encontrados.</p>
+            {% else %}
+                <p>Nenhum livro encontrado.</p>
+            {% endif %}
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="col-md-12 text-light" style="background:#0d6efd;">
+                    <h4 style="margin-bottom: 0px; padding:10px 0 10px 0">Nosso Acervo</h4>
+                </div>
+                <div class="container-fluid"
+                     style="overflow-y: auto;
+                            height: 600px;
+                            background:  #daf1ff;
+                            margin-top: 20px">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Ano</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for livro in livros %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'biblioteca:detalhes' livro.id %}">{{ livro.titulo }}</a>
+                                    </td>
+                                    <td>{{ livro.ano }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

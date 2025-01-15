@@ -1,0 +1,12 @@
+{% extends "index.html" %}
+{% block main %}
+    <div class="form-wrapper">
+        <h2>Atualizando Usuário</h2>
+        {% include "partials/_user-form.html" %}
+        {% if user.is_authenticated %}
+            <p class="message">
+                Você fez login como {{ user.username }}. Clique <a href="{% url 'biblioteca:logout' %}">aqui</a> para sair.
+            </p>
+        {% endif %}
+    </div>
+{% endblock main %}

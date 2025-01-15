@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="pt-br">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+              rel="stylesheet"
+              integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+              crossorigin="anonymous">
+        <link rel="stylesheet" href="{% static 'global/css/style.css' %}">
+        <title>Biblioteca Escolar Digital</title>
+        <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/build/qrious.min.js"></script>
+    </head>
+    <body>
+        <nav class="navbar bg-body-tertiary fixed-top" style="padding: 0px; margin: 0px">
+            <div class="container-fluid justify-content-center align-items-center"
+                 style="background-color: #0d6efd">
+                <span class="navbar-brand lb-1 h3 text-light">
+                    <img src="{% static 'logo_craveiro.png' %}"
+                         alt="Logo Escola Craveiro"
+                         height="auto"
+			 width="100%"
+                         style="margin-right: 10px; max-width: 50px">
+		    Biblioteca Escolar Digital</span>
+            </div>
+            <div class="container-fluid justify-content-center align-items-center">
+                <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        {% if guia_atual == 'inicial' %}
+                            <a class="nav-link active"
+                               aria-current="page"
+                               href="{% url 'biblioteca:inicial' %}">Início</a>
+                        {% else %}
+                            <a class="nav-link"
+                               aria-current="page"
+                               href="{% url 'biblioteca:inicial' %}">Início</a>
+                        {% endif %}
+                    </li>
+                    <li class="nav-item">
+                        {% if guia_atual == 'Livros' %}
+                            <a class="nav-link active"
+                               aria-current="page"
+                               href="{% url 'biblioteca:livros' %}">Livros</a>
+                        {% else %}
+                            <a class="nav-link"
+                               aria-current="page"
+                               href="{% url 'biblioteca:livros' %}">Livros</a>
+                        {% endif %}
+                    </li>
+                    <li class="nav-item">
+                        {% if guia_atual == 'Empréstimos' %}
+                            <a class="nav-link active"
+                               aria-current="page"
+                               href="{% url 'biblioteca:emprestimos' %}">Empréstimos</a>
+                        {% else %}
+                            <a class="nav-link"
+                               aria-current="page"
+                               href="{% url 'biblioteca:emprestimos' %}">Empréstimos</a>
+                        {% endif %}
+                    </li>
+                    {% if not user.is_authenticated %}
+                        <li class="nav-item">
+                            {% if guia_atual == 'Login' %}
+                                <a class="nav-link active"
+                                   aria-current="page"
+                                   href="{% url 'biblioteca:login' %}">Login</a>
+                            {% else %}
+                                <a class="nav-link"
+                                   aria-current="page"
+                                   href="{% url 'biblioteca:login' %}">Login</a>
+                            {% endif %}
+                        {% endif %}
+                    </li>
+                    {% if not user.is_authenticated %}
+                        <li class="nav-item">
+                            {% if guia_atual == 'Cadastrar' %}
+                                <a class="nav-link active"
+                                   aria-current="page"
+                                   href="{% url 'biblioteca:register' %}">Cadastrar</a>
+                            {% else %}
+                                <a class="nav-link"
+                                   aria-current="page"
+                                   href="{% url 'biblioteca:register' %}">Cadastrar</a>
+                            {% endif %}
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            {% if guia_atual == 'Perfil' %}
+                                <a class="nav-link active"
+                                   aria-current="page"
+                                   href="{% url 'biblioteca:user_update' %}">Meu Perfil</a>
+                            {% else %}
+                                <a class="nav-link"
+                                   aria-current="page"
+                                   href="{% url 'biblioteca:user_update' %}">Meu Perfil</a>
+                            {% endif %}
+                        </li>
+                    {% endif %}
+                    {% if user.is_authenticated %}
+                    <a class="nav-link" aria-current="page" href="/user/logout">Sair</a>
+                    {% endif %}
+                    <a class="nav-link" aria-current="page" href="/admin">Admin</a>
+                    <a class="nav-link" aria-current="page" href="/api">API</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    {% block main %}{% endblock %}
+    <footer class="bg-primary text-white text-center py-4 fixed-bottom">
+        <div class="container">
+            <p>&copy; 2025 Site criado para o Projeto Integrador III - UNIVESP.</p>
+        </div>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+            integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+            integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
+            crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+{% extends "index.html" %}
+{% load static %}
+{% block main %}
+    <div class="bg-light text-dark py-5">
+        <div class="container text-center">
+            <img src="{% static '/logo_craveiro.png' %}"
+                 class="rounded-circle mb-4"
+                 alt="Logo Escola Craveiro"
+                 height="200">
+            <h1 class="display-4 font-weight-bold">Olá, leitores!</h1>
+            <p class="lead">Bem-vindo à biblioteca! Aqui você encontrará a coleção de livros do Craveiro!</p>
+            <p class="mt-4">
+                <a role="button"
+                   class="btn btn-primary btn-lg"
+                   href="{% url 'biblioteca:livros' %}">Nossa coleção de livros</a>
+            </p>
+        </div>
+    </div>
+    <br>
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h2 class="card-title">Por que ler é importante?</h2>
+                        <p class="card-text">
+                            Ler é bom porque melhora suas habilidades de foco, memória, empatia e comunicação. Também pode reduzir o estresse, melhorar sua saúde mental e ajudar você a viver mais. Ler permite que você aprenda coisas novas que podem auxiliar em ter sucesso no trabalho e relacionamentos.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h2 class="card-title">Principais benefícios</h2>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">Melhora seu vocabulário e habilidade de compreensão</li>
+                            <li class="list-group-item">Reduz o estresse</li>
+                            <li class="list-group-item">Melhora a saúde mental</li>
+                            <li class="list-group-item">Previne redução cognitiva</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

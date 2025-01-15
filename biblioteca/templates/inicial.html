@@ -1,0 +1,41 @@
+{% extends "index.html" %}
+{% load static %}
+{% block main %}
+    <div class="container">
+        <img src="{% static '/logo_craveiro.png' %}"
+             class="rounded float-start"
+             alt="Logo Escola Craveiro"
+             height="auto"
+             width="55%"
+             style="margin-right: 20px;
+                    margin-top: 15px;
+                    max-width: 200px">
+        <h1 class="display-4">Olá, leitores!</h1>
+        <p>Bem-vindo à biblioteca! Aqui você encontrará a coleção de livros do Craveiro!</p>
+        <p style="margin-bottom: 40px;">
+            <a role="button" class="btn btn-primary btn-lg" href="/livros"> Nossa coleção de
+            livros</a>
+        </p>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h1>Por que ler é importante?</h1>
+                    <p>
+                        Ler é bom porque melhora suas habilidades de foco, memória, empatia e comunicação. Também pode
+                        reduzir o estresse, melhorar sua saúde mental e ajudar você a viver mais. Ler também permite
+                        você aprender coisas novas que podem auxiliar em ter sucesso no trabalho e relacionamentos.
+                    </p>
+                </div>
+                <div class="col">
+                    <h1>Principais benefícios</h1>
+                    <ul>
+                        <li>Melhora seu vocabulário e habilidade de compreensão</li>
+                        <li>Reduz o estresse</li>
+                        <li>Melhora a saúde mental</li>
+                        <li>Previne redução cognitiva</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+{% extends "index.html" %}
+{% load static %}
+{% block main %}
+    <div class="container d-flex flex-column text-center justify-content-center"
+         style="padding-top:0px;
+                background-color: #fff">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="col-md-12 text-light" style="background:#0d6efd;">
+                    <h4 style="margin-bottom: 0px; padding:10px 0 10px 0">{{ livro.titulo }}</h4>
+                </div>
+                <div class="container-fluid"
+                     style="margin-top: 20px;
+                            background: #daf1ff;
+                            padding: 20px">
+                    <p>
+                        <strong>Subtítulo:</strong> {{ livro.subtitulo }}
+                    </p>
+                    <p>
+                        <strong>ISBN:</strong> {{ livro.isbn }}
+                    </p>
+                    <p>
+                        <strong>Ano:</strong> {{ livro.ano }}
+                    </p>
+                    <p>
+                        <strong>Edição:</strong> {{ livro.edicao }}
+                    </p>
+                    <p>
+                        <strong>CDD:</strong> {{ livro.cdd.nome }}
+                    </p>
+                    <p>
+                        <strong>Editora:</strong> {{ livro.editora.nome }}
+                    </p>
+                    <p>
+                        <strong>Local de Publicação:</strong> {{ livro.local_publicacao.nome }}
+                    </p>
+                    <p>
+                        <strong>Quantidade de Exemplares:</strong> {{ exemplares.count }}
+                    </p>
+                    <p>
+                        <strong>Exemplares disponíveis:</strong> {{ exemplares_disponiveis }}
+                    </p>
+                    <p>
+                        <strong>Autores:</strong>
+                        {% if autores %}
+                            {% for autor in autores %}
+                                {{ autor.autor.nome }}
+                                {% if not forloop.last %},{% endif %}
+                            {% endfor %}
+                        {% else %}
+                            Nenhum autor encontrado.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+{% extends "index.html" %}
+{% load static %}
+{% block main %}
+    <div class="container d-flex flex-column text-center justify-content-center"
+         style="padding-top:0px;
+                background-color: #fff">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="col-md-12 text-light" style="background:#0d6efd;">
+                    <h4 style="margin-bottom: 0px; padding:10px 0 10px 0">Suas Devoluções Pendentes</h4>
+                </div>
+                <div class="container-fluid"
+                     style="overflow-y: auto;
+                            height: 600px;
+                            background:  #daf1ff;
+                            margin-top: 20px">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Livro</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for livro in livros %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'detalhes_livro' livro.id %}">{{ livro.nome }}</a>
+                                    </td>
+                                    <td>{{ livro.ano }}</td>
+                                    <td>{{ livro.edicao }}</td>
+                                    <td>{{ livro.autor }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
