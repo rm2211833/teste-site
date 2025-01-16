@@ -2,10 +2,13 @@
 {% extends "index.html" %}
 {% load static %}
 {% block main %}
+
     <div class="container d-flex flex-column text-center justify-content-center"
          style="padding-top:0px;
                 background-color: #fff">
         <div class="row">
+            <p>A pesquisa pode ser feita por título, autor ou ISBN.</p>
+
             <nav class="navbar bg-body-light">
                 <div class="container-fluid justify-content-center align-items-center">
                     <form class="d-flex" role="search" action="/livros" method="POST">
@@ -16,7 +19,7 @@
                 </div>
             </nav>
         </div>
-        <div class="row" style="margin-top: 20px;">
+        <div class="row" style="margin-top: 20px;">          
             {% if livros|length == 1 %}
                 <p>{{ livros|length }} livro encontrado.</p>
             {% elif livros|length > 1 %}
@@ -39,7 +42,10 @@
                         <thead>
                             <tr>
                                 <th>Título</th>
+                                <th>Autor</th>
+                                <th>Edição</th>
                                 <th>Ano</th>
+                                <th>ISBN</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -48,7 +54,18 @@
                                     <td>
                                         <a href="{% url 'biblioteca:detalhes' livro.id %}">{{ livro.titulo }}</a>
                                     </td>
-                                    <td>{{ livro.ano }}</td>
+                                    {% comment %} <td>{{ livro.autores }}</td> {% endcomment %}
+                                    <td>
+                                    {% for autor in livro.autores.all  %}
+                                    {{autor.autor.nome}} 
+                                        {% if not forloop.last %}
+                                        ; 
+                                        {% endif %}
+                                    {% endfor %}
+                                    </td>
+                                    <td>{{ livro.edicao|default_if_none:"" }}</td>
+                                    <td>{{ livro.ano|default_if_none:"" }}</td>
+                                    <td>{{ livro.isbn|default_if_none:"" }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>

@@ -76,8 +76,8 @@ class LivroTemAutor(models.Model):
     def __str__(self):
         return f"Autor: {self.autor.nome}, Livro: {self.livro.titulo}"
 
-    autor = models.ForeignKey(Autor, on_delete=models.SET_NULL, blank=True, null=True)
-    livro = models.ForeignKey(Livro, on_delete=models.SET_NULL, blank=True, null=True)
+    autor = models.ForeignKey(Autor, on_delete=models.SET_NULL, blank=True, null=True, related_name="livros")
+    livro = models.ForeignKey(Livro, on_delete=models.SET_NULL, blank=True, null=True, related_name="autores")
 
 
 class Exemplar(models.Model):

@@ -2,9 +2,8 @@
 from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
-
 from . import forms, models
 
 
@@ -12,12 +11,13 @@ def inicial(request):
     return render(request, "inicial.html", context={"guia_atual": "inicial"})
 
 
-def livros(request):
+def livros(request):    
     if request.method == "GET":
-        livros = models.Livro.objects.all()
+        livros = models.Livro.objects.all()        
+        
     else:
         pesquisa = request.POST["termos_pesquisa"]
-        livros = models.Livro.objects.filter(nome__icontains=pesquisa)
+        livros = models.Livro.objects.filter(Q(titulo__icontains=pesquisa) | Q(isbn__icontains=pesquisa) | Q(autores__autor__nome__icontains=pesquisa))
 
     context = {"guia_atual": "Livros", "livros": livros}
     return render(request, "livros.html", context)
