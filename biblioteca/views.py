@@ -2,9 +2,11 @@
 from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from django.db.models import Count, Q, Prefetch
+from django.db.models import Count, Q
+from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404, redirect, render
-from . import forms, models
+
+from . import forms, models, tratamento_dados
 
 
 def inicial(request):
@@ -14,7 +16,6 @@ def inicial(request):
 def livros(request):    
     if request.method == "GET":
         livros = models.Livro.objects.all()        
-        
     else:
         pesquisa = request.POST["termos_pesquisa"]
         livros = models.Livro.objects.filter(Q(titulo__icontains=pesquisa) | Q(isbn__icontains=pesquisa) | Q(autores__autor__nome__icontains=pesquisa))
@@ -35,7 +36,7 @@ def detalhes(request, livro_id):
         .filter(emprestimos_ativos=0)
         .count()
     )
-    autores = livro.livrotemautor_set.select_related("autor")
+    autores = livro.autores.select_related("autor")
     context = {
         "guia_atual": "Livros",
         "livro": livro,
@@ -47,49 +48,46 @@ def detalhes(request, livro_id):
 
 
 @login_required(login_url="biblioteca:login")
-def emprestimos(request):
-    emprestimos = models.Emprestimo.objects.filter(leitor=request.user)
-    context = {"guia_atual": "Empréstimos", "emprestimos": emprestimos}
-    return render(request, "emprestimos.html", context)
-
-
-def register(request):
-    form = forms.RegisterForm()
+def restrito(request):
+    # Recuperar a mensagem armazenada na sessão, se houver
+    mensagem = request.session.pop('mensagem', None)
+    
+    # Contexto padrão com a guia atual e a mensagem (se existente)
     context = {
-        "guia_atual": "Cadastrar",
-        "form": form,
+        "guia_atual": "Restrito",
+        "mensagem": mensagem,
     }
-
-    if request.method == "POST":
-        form = forms.RegisterForm(request.POST)
-
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Usuário registrado")
-            return redirect("biblioteca:login")
-
-    return render(request, "create_user.html", context)
+    
+    return render(request, "restrito.html", context)
 
 
-@login_required(login_url="biblioteca:login")
-def user_update(request):
-    form = forms.RegisterUpdateForm(instance=request.user)
+def salvar_leitores(request):
+    if request.method == 'POST':
+        form = forms.UploadCSVLeitores(request.POST, request.FILES)
+        if form.is_valid():            
+            try:
+                lista_leitores = tratamento_dados.ajustar_csv_leitores(request.FILES
+                                                                       ["file"])
+                tratamento_dados.salvar_leitor(lista_leitores)         
+                # Armazene a mensagem no sistema de mensagens ou na sessão
+                request.session['mensagem'] = {"situacao": "sucesso", "texto": "Arquivo enviado com sucesso!"}
+            except IntegrityError:
+                request.session['mensagem'] = {"situacao": "erro", "texto": "Existem leitores já cadastrados com esses dados. Verifique seu arquivo."}
+            except Exception as e:
+                print(e)
+                request.session['mensagem'] = {"situacao": "erro", "texto": "Erro ao enviar o arquivo. Verifique o formulário."}
+            # Redirecione para a página /restrito
+            return redirect('/restrito')
+        else:
+            mensagem = {"situacao": "erro", "texto": "Erro ao enviar o arquivo. Verifique o formulário."}
+            return render(request, 'restrito.html', {'form': form, 'mensagem': mensagem, "guia_atual": "Restrito"})
 
-    if request.method != "POST":
-        return render(
-            request, "user_update.html", {"guia_atual": "Perfil", "form": form}
-        )
-
-    form = forms.RegisterUpdateForm(data=request.POST, instance=request.user)
-
-    if not form.is_valid():
-        return render(
-            request, "user_update.html", {"guia_atual": "Perfil", "form": form}
-        )
-
-    form.save()
-    return redirect("biblioteca:user_update")
-
+    # Caso seja um GET, exiba o formulário vazio
+    form = forms.UploadCSVLeitores()
+    # Verifique se há mensagem na sessão e remova após exibição
+    mensagem = request.session.pop('mensagem', None)
+    return render(request, 'restrito.html', {'form': form, 'mensagem': mensagem, "guia_atual": "Restrito"})
+    
 
 def login_view(request):
     form = AuthenticationForm(request)
@@ -107,8 +105,3 @@ def login_view(request):
     context = {"form": form, "guia_atual": "Login"}
     return render(request, "login.html", context)
 
-
-@login_required(login_url="biblioteca:login")
-def logout_view(request):
-    auth.logout(request)
-    return redirect("biblioteca:login")

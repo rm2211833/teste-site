@@ -43,11 +43,13 @@
                     </p>
                     <p>
                         <strong>Autores:</strong>
-                        {% if autores %}
-                            {% for autor in autores %}
-                                {{ autor.autor.nome }}
-                                {% if not forloop.last %},{% endif %}
-                            {% endfor %}
+                        {% if  livro.autores.all %}
+                        {% for autor in livro.autores.all  %}
+                        {{autor.autor.nome}} 
+                            {% if not forloop.last %}
+                            ; 
+                            {% endif %}
+                        {% endfor %}
                         {% else %}
                             Nenhum autor encontrado.
                         {% endif %}
