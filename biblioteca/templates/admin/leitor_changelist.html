@@ -5,7 +5,7 @@
     <form method="post" enctype="multipart/form-data" action="{% url 'admin:importar_csv' %}">
       {% csrf_token %}
       <input type="file" name="csv_file" accept=".csv" required>
-      <button type="submit" class="button">Importar CSV</button>
+      <button type="submit" class="button" style="padding: 6px 10px; font-size: 15px;">Importar CSV</button>
     </form>
   </div>
   {{ block.super }}

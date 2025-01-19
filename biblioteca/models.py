@@ -67,7 +67,10 @@ class Livro(models.Model):
         verbose_name_plural = "livros"
 
     def __str__(self):
-        return self.titulo
+        nome = self.titulo
+        if self.subtitulo:
+            nome+=" : "+self.subtitulo
+        return nome
 
     titulo = models.CharField(max_length=100)
     subtitulo = models.CharField(max_length=100, blank=True)

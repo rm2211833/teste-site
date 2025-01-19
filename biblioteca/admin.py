@@ -1,13 +1,16 @@
-from datetime import datetime
+from datetime import date, datetime
 
 from django.contrib import admin, messages
+from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import path
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
 
-from biblioteca.GeradorEtiquetaPDF import GerarEtiquetaPDF
+from biblioteca.PDFsGerados.GeradorEtiquetaPDF import GerarEtiquetaPDF
+from biblioteca.PDFsGerados.RelatoriosPDF import (RelatorioDevedores,
+                                                  RelatorioEmprestimosAnual,
+                                                  RelatorioEmprestimosMensal,
+                                                  RelatorioLeitores)
 
 from . import forms, models, tratamento_dados
 
@@ -29,7 +32,7 @@ def gerar_pdf_etiquetas(modeladmin, request, exemplares):
     models.Exemplar.objects.bulk_update(exemplares, ['etiqueta_gerada'])       
     return response
 
-gerar_pdf_etiquetas.short_description = "Gerar PDF de Etiquetas"
+gerar_pdf_etiquetas.short_description = "Gerar PDF de Etiquetas" #type:ignore
 
 class AutorAdmin(admin.ModelAdmin):
     list_display = ("id", "nome", "codigo_autor")
@@ -62,24 +65,82 @@ class EmprestimoAdmin(admin.ModelAdmin):
         "data_devolucao",
         "devolvido",
     )
-    search_fields = ("leitor__nome", "exemplar__livro__titulo" )  
+    search_fields = ("leitor__nome", "exemplar__livro__titulo", "exemplar__numero_exemplar" )  
     autocomplete_fields = ["leitor", "exemplar"]    
     ordering = ("devolvido", "data_emprestimo")
     list_display_links = ("id", "leitor", "exemplar")
     list_editable = ("devolvido",)
     list_per_page = 30
+    
     def get_form(self, request, obj = None, change = False, **kwargs):
         form = super().get_form(request, obj, change, **kwargs)
         form.base_fields["data_emprestimo"].label = "Data de Empréstimo"
         form.base_fields["data_devolucao"].label = "Data de Devolução"
         return form
     
+    def relatorio_devedores(self, request):       
+            emprestimos_atrasados = models.Emprestimo.objects.filter(
+            devolvido=False,
+            data_devolucao__lt=date.today()  # Data de devolução menor que hoje (atraso)
+        ).select_related('leitor', 'exemplar')  # Evita consultas adicionais para leitor/exemplar
+    
+            # Ordena pelo empréstimo mais antigo
+            emprestimos_atrasados = emprestimos_atrasados.order_by('data_devolucao')
+            response = HttpResponse(content_type='application/pdf')
+            relatorio_devedores = RelatorioDevedores(emprestimos_atrasados, "relatorio-devedores")
+            relatorio_devedores.Gerar(response)                
+            return response
+        
+    def relatorio_leitores(self, request):
+            leitores= models.Leitor.objects.filter(ativo=True).annotate(
+            quantidade_emprestada=Count('emprestimo')
+            ).filter(quantidade_emprestada__gt=0).order_by('-quantidade_emprestada')
+            response = HttpResponse(content_type='application/pdf')
+            relatorio_leitores = RelatorioLeitores(leitores, "relatorio-leitores")
+            relatorio_leitores.Gerar(response)            
+            return response
+                
+    def relatorio_emprestimos_mensal(self, request):
+        if request.method == 'POST': 
+            mes = request.POST.get("mes")
+            ano = request.POST.get("ano")
+            emprestimos = models.Emprestimo.objects.filter(data_emprestimo__year = ano, data_emprestimo__month=mes).order_by("leitor", "data_emprestimo")
+            response = HttpResponse(content_type='application/pdf')
+            relatorio_emprestimo = RelatorioEmprestimosMensal(emprestimos, f"relatorio-emprestimos-{mes}-{ano}")
+            relatorio_emprestimo.Gerar(response, mes, ano)              
+            return response    
+        return redirect('..')
+
+    def relatorio_emprestimos_anual(self, request):
+        if request.method == 'POST':            
+            ano = request.POST.get("ano")
+            emprestimos = models.Emprestimo.objects.filter(data_emprestimo__year = ano).order_by("leitor", "data_emprestimo")
+            response = HttpResponse(content_type='application/pdf')
+            relatorio_emprestimo = RelatorioEmprestimosAnual(emprestimos, f"relatorio-emprestimos-{ano}")
+            relatorio_emprestimo.Gerar(response, ano)              
+            return response    
+        return redirect('..')
+      
+    # Adiciona a ação no Admin
+    change_list_template = "admin/emprestimo_changelist.html"
+    
+    def get_urls(self):
+        """Adiciona a URL personalizada."""
+        urls = super().get_urls()
+        custom_urls = [
+            path('relatorio_devedores/', self.admin_site.admin_view(self.relatorio_devedores), name='relatorio_devedores'),
+            path('relatorio_leitores/', self.admin_site.admin_view(self.relatorio_leitores), name='relatorio_leitores'),
+            path('relatorio_emprestimos_mensal/', self.admin_site.admin_view(self.relatorio_emprestimos_mensal), name='relatorio_emprestimos_mensal'),
+            path('relatorio_emprestimos_anual/', self.admin_site.admin_view(self.relatorio_emprestimos_anual), name='relatorio_emprestimos_anual'),
+        ]
+        return custom_urls + urls     
+    
 class ExemplarAdmin(admin.ModelAdmin):
     form = forms.ExemplarAdminForm
     list_display = ("id", "livro", "tombo", "numero_exemplar", "baixa", "etiqueta_gerada" )
     list_display_links = ("id", "livro", "tombo")
     list_editable = ("baixa","etiqueta_gerada")        
-    search_fields = ("livro__titulo","numero_exemplar")  
+    search_fields = ("id", "livro__titulo","numero_exemplar")  
     ordering = ("id",)      
     autocomplete_fields = ["livro"] 
     list_per_page = 30
@@ -178,7 +239,6 @@ class LeitorAdmin(admin.ModelAdmin):
         """Adiciona a URL personalizada."""
         urls = super().get_urls()
         custom_urls = [
-            # path('importar-csv/', self.admin_site.admin_view(self.importar_csv), name='importar_csv'),
             path('importar-csv/', self.admin_site.admin_view(self.importar_csv), name='importar_csv'),
         ]
         return custom_urls + urls
@@ -190,22 +250,7 @@ class LivroAdmin(admin.ModelAdmin):
     ordering = ("id",)
     list_per_page = 30
     autocomplete_fields = ["cdd", "editora", "local_publicacao"] 
-    inlines = [LivroTemAutorInline]
-
-    def save_model(self, request, obj, form, change):
-        """
-        Sobrescreve o método para salvar o livro e criar múltiplos exemplares associados.
-        """
-        super().save_model(request, obj, form, change)
-
-        # Obtém a quantidade de exemplares do formulário
-        quantidade = form.cleaned_data.get("quantidade_exemplares", 0)
-
-        # Gera os exemplares se a quantidade for maior que zero
-        if quantidade > 0:
-            models.Exemplar.objects.bulk_create(
-                [models.Exemplar(livro=obj) for _ in range(quantidade)]
-            )
+    inlines = [LivroTemAutorInline]    
 
 class LivroTemAutorAdmin(admin.ModelAdmin):
     list_display = ("id", "autor", "livro")
@@ -222,7 +267,6 @@ class Local_PublicacaoAdmin(admin.ModelAdmin):
     ordering = ("id",)
     list_per_page = 30
 
-# gerar_pdf_etiquetas.short_description = "Gerar PDF de Etiquetas"
 
 admin.site.register(models.Cdd, CddAdmin)
 admin.site.register(models.Autor, AutorAdmin)

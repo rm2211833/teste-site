@@ -26,19 +26,33 @@ def ajustar_csv_leitores(arquivo):
     
 def salvar_leitor(lista_leitores):
     with transaction.atomic():  # Garante a atomicidade da operação
+        leitores_existentes = models.Leitor.objects.filter(ra__in=[leitor["ra"] for leitor in lista_leitores])
+        leitores_por_ra = {leitor.ra: leitor for leitor in leitores_existentes}
+
+        novos_leitores = []
+        leitores_para_atualizar = []
+
         for leitor in lista_leitores:
-            leitor_cadastrado = models.Leitor.objects.filter(ra=leitor["ra"]).first()
+            leitor_cadastrado = leitores_por_ra.get(leitor["ra"])
+            
             if not leitor_cadastrado:
-               if leitor["ativo"]:
-                   models.Leitor.objects.create(
-                      nome=leitor["nome"],
-                      ra=leitor["ra"],
-                      ativo=leitor["ativo"],
-                  )    
-               continue               
-            if leitor_cadastrado.ativo != leitor["ativo"]:                
+                if leitor["ativo"]:
+                    novos_leitores.append(models.Leitor(
+                        nome=leitor["nome"],
+                        ra=leitor["ra"],
+                        ativo=leitor["ativo"],
+                    ))
+            elif leitor_cadastrado.ativo != leitor["ativo"]:
                 leitor_cadastrado.ativo = leitor["ativo"]
-                leitor_cadastrado.save()
+                leitores_para_atualizar.append(leitor_cadastrado)
+        
+        # Inserção em lote para novos leitores
+        if novos_leitores:
+            models.Leitor.objects.bulk_create(novos_leitores)
+        
+        # Atualização em lote para leitores existentes
+        if leitores_para_atualizar:
+            models.Leitor.objects.bulk_update(leitores_para_atualizar, ['ativo'])
     
 def _pegar_lista(turma, linhas):   
         reader = iter(list(csv.reader(turma, delimiter=';')))
