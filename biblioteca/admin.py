@@ -1,9 +1,35 @@
 from datetime import datetime
 
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.http import HttpResponse
+from django.shortcuts import redirect
+from django.urls import path
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
 
-from . import forms, models
+from biblioteca.GeradorEtiquetaPDF import GerarEtiquetaPDF
 
+from . import forms, models, tratamento_dados
+
+
+def gerar_pdf_etiquetas(modeladmin, request, exemplares):
+    """
+    Gera um PDF com etiquetas para os livros selecionados.
+    """
+    gerador = GerarEtiquetaPDF(exemplares)
+    pdf = gerador.criar_pdf()
+    # Cria uma resposta HTTP para o arquivo PDF
+    response = HttpResponse(pdf, content_type='application/pdf')
+    data_e_hora = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    response['Content-Disposition'] = f'attachment; filename="etiquetas-{data_e_hora}.pdf"'
+   
+    for exemplar in exemplares:       
+        exemplar.etiqueta_gerada = True
+        
+    models.Exemplar.objects.bulk_update(exemplares, ['etiqueta_gerada'])       
+    return response
+
+gerar_pdf_etiquetas.short_description = "Gerar PDF de Etiquetas"
 
 class AutorAdmin(admin.ModelAdmin):
     list_display = ("id", "nome", "codigo_autor")
@@ -12,7 +38,6 @@ class AutorAdmin(admin.ModelAdmin):
     search_fields = ("nome",)    
     list_per_page = 30
     ordering = ("id",)
-
 
 class CddAdmin(admin.ModelAdmin):
     list_display = ("id", "nome")
@@ -57,12 +82,14 @@ class ExemplarAdmin(admin.ModelAdmin):
     search_fields = ("livro__titulo","numero_exemplar")  
     ordering = ("id",)      
     autocomplete_fields = ["livro"] 
-    list_per_page = 20
+    list_per_page = 30
     fieldsets = (
     (None, {
         "fields": ("livro", "tombo", "numero_exemplar", "baixa", "etiqueta_gerada", "quantidade"),
     }),
-    )    
+    )  
+    list_filter =  ("etiqueta_gerada",)
+    actions =[gerar_pdf_etiquetas]  
        
     def save_model(self, request, obj, form, change):
         quantidade = form.cleaned_data.get("quantidade")
@@ -114,7 +141,6 @@ class ExemplarAdmin(admin.ModelAdmin):
             return ("numero_exemplar", "tombo")
         return ("id")
 
-
 class LivroTemAutorInline(admin.TabularInline):
     model = models.LivroTemAutor  # Modelo de relacionamento
     extra = 1  # Número de formulários extras vazios
@@ -126,10 +152,36 @@ class LivroTemAutorInline(admin.TabularInline):
 class LeitorAdmin(admin.ModelAdmin):
     list_display = ("id", "nome", "ra", "ativo")
     search_fields = ("nome","ra")
+    list_display_links = ("id","nome", "ra")
     list_per_page = 30
     ordering = ("id",)
     list_editable = ("ativo",)   
+    
+    def importar_csv(self, request):
+        if request.method == 'POST':         
+            try:
+                lista_leitores = tratamento_dados.ajustar_csv_leitores(request.FILES
+                                                                       ["csv_file"])  
+                tratamento_dados.salvar_leitor(lista_leitores)         
+                # Armazene a mensagem no sistema de mensagens ou na sessão     
+                self.message_user(request, "Leitores importados com sucesso!", messages.SUCCESS)
+                return redirect('..')          
+            except StopIteration:
+                 self.message_user(request, f"Arquivo inválido.", messages.ERROR)
+                 return redirect('..')         
+            
 
+    # Adiciona a ação no Admin
+    change_list_template = "admin/leitor_changelist.html"
+    
+    def get_urls(self):
+        """Adiciona a URL personalizada."""
+        urls = super().get_urls()
+        custom_urls = [
+            # path('importar-csv/', self.admin_site.admin_view(self.importar_csv), name='importar_csv'),
+            path('importar-csv/', self.admin_site.admin_view(self.importar_csv), name='importar_csv'),
+        ]
+        return custom_urls + urls
 
 class LivroAdmin(admin.ModelAdmin):
     list_display = ("id", "titulo", "subtitulo", "ano", "edicao", "iniciais_titulo", "isbn")
@@ -155,7 +207,6 @@ class LivroAdmin(admin.ModelAdmin):
                 [models.Exemplar(livro=obj) for _ in range(quantidade)]
             )
 
-
 class LivroTemAutorAdmin(admin.ModelAdmin):
     list_display = ("id", "autor", "livro")
     list_display_links = ("id", "autor", "livro")
@@ -171,6 +222,7 @@ class Local_PublicacaoAdmin(admin.ModelAdmin):
     ordering = ("id",)
     list_per_page = 30
 
+# gerar_pdf_etiquetas.short_description = "Gerar PDF de Etiquetas"
 
 admin.site.register(models.Cdd, CddAdmin)
 admin.site.register(models.Autor, AutorAdmin)

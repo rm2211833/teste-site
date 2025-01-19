@@ -61,34 +61,6 @@ def restrito(request):
     return render(request, "restrito.html", context)
 
 
-def salvar_leitores(request):
-    if request.method == 'POST':
-        form = forms.UploadCSVLeitores(request.POST, request.FILES)
-        if form.is_valid():            
-            try:
-                lista_leitores = tratamento_dados.ajustar_csv_leitores(request.FILES
-                                                                       ["file"])
-                tratamento_dados.salvar_leitor(lista_leitores)         
-                # Armazene a mensagem no sistema de mensagens ou na sessão
-                request.session['mensagem'] = {"situacao": "sucesso", "texto": "Arquivo enviado com sucesso!"}
-            except IntegrityError:
-                request.session['mensagem'] = {"situacao": "erro", "texto": "Existem leitores já cadastrados com esses dados. Verifique seu arquivo."}
-            except Exception as e:
-                print(e)
-                request.session['mensagem'] = {"situacao": "erro", "texto": "Erro ao enviar o arquivo. Verifique o formulário."}
-            # Redirecione para a página /restrito
-            return redirect('/restrito')
-        else:
-            mensagem = {"situacao": "erro", "texto": "Erro ao enviar o arquivo. Verifique o formulário."}
-            return render(request, 'restrito.html', {'form': form, 'mensagem': mensagem, "guia_atual": "Restrito"})
-
-    # Caso seja um GET, exiba o formulário vazio
-    form = forms.UploadCSVLeitores()
-    # Verifique se há mensagem na sessão e remova após exibição
-    mensagem = request.session.pop('mensagem', None)
-    return render(request, 'restrito.html', {'form': form, 'mensagem': mensagem, "guia_atual": "Restrito"})
-    
-
 def login_view(request):
     form = AuthenticationForm(request)
 
