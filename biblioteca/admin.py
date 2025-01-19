@@ -277,3 +277,4 @@ admin.site.register(models.Exemplar, ExemplarAdmin)
 admin.site.register(models.Local_Publicacao, Local_PublicacaoAdmin)
 admin.site.register(models.Editora, EditoraAdmin)
 admin.site.register(models.Leitor, LeitorAdmin)
+

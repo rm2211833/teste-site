@@ -4,8 +4,10 @@
 {% block main %}
 
 
-<p>Acesse o <a href="/admin"> banco de dados aqui</a>.</p>
-<p>Acesse a <a href="/api"> API aqui</a>.</p>
+<div class="d-flex flex-column justify-content-center align-items-center">
+    <a href="/admin" class="btn btn-primary btn-lg mb-3">Banco de Dados</a>
+    <a href="/api" class="btn btn-success btn-lg">API</a>
+  </div>
   
 
 {% endblock %}

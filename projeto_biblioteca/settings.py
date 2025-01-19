@@ -34,6 +34,8 @@ REST_FRAMEWORK = {
 # Application definition
 
 INSTALLED_APPS = [
+    "admin_interface", 
+    "colorfield", 
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -43,7 +45,10 @@ INSTALLED_APPS = [
     "biblioteca.apps.BibliotecaConfig",
     "rest_framework",
     "api.apps.ApiConfig",
+    
 ]
+
+X_FRAME_OPTIONS='SAMEORIGIN' # only if django version >= 3.0
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -74,6 +79,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "projeto_biblioteca.wsgi.application"
+
 
 
 # Database
