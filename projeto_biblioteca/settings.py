@@ -24,7 +24,7 @@ SECRET_KEY = "django-insecure-nm07@tm^oao_96q8ov8cz91kr^zh8#s6n0%s$3tj&=0dab$b$4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = [".vercel.app"] #type:ignore
+ALLOWED_HOSTS = [".vercel.app", ".now.sh", "127.0.0.1", 'localhost'] #type:ignore
 
 # API
 REST_FRAMEWORK = {
@@ -86,17 +86,23 @@ WSGI_APPLICATION = "projeto_biblioteca.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
+
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "bibliotecadb",
+        "USER": "admin",
+        "PASSWORD": "admin@!123",
+        "HOST": "localhost",
+        "PORT": "3306",
     }
 }
-
-DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
-DATABASES['default']['OPTIONS']['charset'] = 'utf8mb4'
-del DATABASES['default']['OPTIONS']['sslmode'] 
-DATABASES['default']['OPTIONS']['ssl'] =  {'ca': os.environ.get('MYSQL_ATTR_SSL_CA')}
 
 
 # Password validation
@@ -134,8 +140,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "static/"
-STATIC_ROOT = (BASE_DIR / "staticfiles_build" / 'static')
 STATICFILES_DIRS = (BASE_DIR / "base_static",)
+STATIC_ROOT = (BASE_DIR / "staticfiles_build" / 'static')
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
