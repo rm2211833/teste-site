@@ -48,17 +48,16 @@
                                href="{% url 'biblioteca:livros' %}">Livros</a>
                         {% endif %}
                     </li> 
-                    <li class="nav-item">
-                        {% if guia_atual == 'Restrito' %}
-                            <a class="nav-link active"
-                               aria-current="page"
-                               href="{% url 'biblioteca:restrito' %}">Restrito</a>
-                        {% else %}
+                    <li class="nav-item">                        
                             <a class="nav-link"
                                aria-current="page"
-                               href="{% url 'biblioteca:restrito' %}">Restrito</a>
-                        {% endif %}
+                               href="/admin">Admin</a>                       
                     </li> 
+                    <li class="nav-item">                        
+                        <a class="nav-link"
+                           aria-current="page"
+                           href="{% url 'biblioteca:api' %}">API</a>                       
+                </li> 
                 </li>
             </ul>
         </div>

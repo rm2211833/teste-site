@@ -2,12 +2,7 @@
 {% block main %}
     <div class="form-wrapper">
         <h1>Login</h1>
-        {% if user.is_authenticated %}
-            <p>
-                Você fez login como {{ user.username }}
-                Clique <a href="{% url 'biblioteca:logout' %}">aqui</a> para sair.
-            </p>
-        {% else %}
+        {% if not user.is_authenticated %}            
             <form action="{{ form_action }}" method="post">
                 {% csrf_token %}
                 <div class="form-content">

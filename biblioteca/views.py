@@ -48,17 +48,10 @@ def detalhes(request, livro_id):
 
 
 @login_required(login_url="biblioteca:login")
-def restrito(request):
+def api(request):
     # Recuperar a mensagem armazenada na sessão, se houver
-    mensagem = request.session.pop('mensagem', None)
-    
-    # Contexto padrão com a guia atual e a mensagem (se existente)
-    context = {
-        "guia_atual": "Restrito",
-        "mensagem": mensagem,
-    }
-    
-    return render(request, "restrito.html", context)
+    mensagem = request.session.pop('mensagem', None)  
+    return redirect("/api")
 
 
 def login_view(request):
@@ -70,10 +63,10 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             auth.login(request, user)
-            return redirect("biblioteca:inicial")
+            return redirect("/api")
         else:
             messages.error(request, "Login inválido")
 
-    context = {"form": form, "guia_atual": "Login"}
+    context = {"form": form}
     return render(request, "login.html", context)
 
